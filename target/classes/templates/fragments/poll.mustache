@@ -1,0 +1,50 @@
+<div class="post framed">
+    <img src="{{user.profileImagePath}}" alt="User avatar">
+    <div class="post-body">
+        <div class="username">
+            <a href="/profile/{{user.userId}}">{{user.firstName}} {{user.lastName}}</a>
+        </div>
+
+        <div class="post-date">{{pollDate}}</div>
+
+        <div class="post-content">
+            {{question}}
+        </div>
+
+        <div class="poll-options">
+            {{#options}}   
+            <div>
+                {{#pollDisabled}}
+                <form method="post" action="/polls/{{pollId}}/vote">
+                        <div>
+                            <button type="submit" name="optionId" value="{{optionId}}" class="action-button" disabled>
+                                {{optionText}}
+                            </button>
+                            {{#hasUserVoted}}
+                                <span> <-</span>
+                            {{/hasUserVoted}}
+                            <span class="action-count">{{pollVoteCount}}</span>
+                        </div>
+                </form>
+                {{/pollDisabled}}
+
+                {{^pollDisabled}}
+                    <form method="post" action="/polls/{{pollId}}/vote">
+                        <div>
+                            <button type="submit" name="optionId" value="{{optionId}}" class="action-button">
+                                {{optionText}}
+                            </button>
+                            {{#hasUserVoted}}
+                                <span> <-</span>
+                            {{/hasUserVoted}}
+                            <span class="action-count">{{pollVoteCount}}</span>
+                        </div>
+                </form>
+                {{/pollDisabled}}
+            
+            </div>
+            {{/options}}
+        
+        </div>
+    </div>
+</div>
