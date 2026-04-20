@@ -23,11 +23,11 @@ import uga.menik.csx370.services.UserService;
 /**
  * This controller handles the game page and its sub URLs.
  * 
- * GET  /game        -> loads today's game session for the logged-in user
- * POST /game/guess  -> submits a guess and returns hint feedback
+ * GET  /        -> loads today's game session for the logged-in user
+ * POST //guess  -> submits a guess and returns hint feedback
  */
 @Controller
-@RequestMapping("/game")
+@RequestMapping("/")
 public class GameController {
 
     private final DataSource dataSource;
@@ -39,7 +39,7 @@ public class GameController {
     }
 
     /**
-     * Handles GET /game
+     * Handles GET 
      * 
      * Loads today's daily_game, finds or creates a game_session for the
      * logged-in user, then fetches all guesses made so far in that session.
@@ -73,7 +73,7 @@ public class GameController {
         } catch (SQLException e) {
             e.printStackTrace();
             String message = URLEncoder.encode("Failed to load today's game. Please try again.", StandardCharsets.UTF_8);
-            return new ModelAndView("redirect:/game?error=" + message);
+            return new ModelAndView("redirect:/?error=" + message);
         }
 
         final String getSessionSql =
@@ -121,7 +121,7 @@ public class GameController {
         } catch (SQLException e) {
             e.printStackTrace();
             String message = URLEncoder.encode("Failed to load your game session. Please try again.", StandardCharsets.UTF_8);
-            return new ModelAndView("redirect:/game?error=" + message);
+            return new ModelAndView("redirect:/?error=" + message);
         }
 
         final String getGuessesSql =
@@ -157,7 +157,7 @@ public class GameController {
         } catch (SQLException e) {
             e.printStackTrace();
             String message = URLEncoder.encode("Failed to load guesses. Please try again.", StandardCharsets.UTF_8);
-            return new ModelAndView("redirect:/game?error=" + message);
+            return new ModelAndView("redirect:/?error=" + message);
         }
 
         mv.addObject("sessionId", sessionId);
@@ -176,7 +176,7 @@ public class GameController {
     }
 
     /**
-     * Handles POST /game/guess
+     * Handles POST //guess
      * 
      * Receives the guessed actor name from the form, looks up that actor,
      * compares attributes against today's answer, builds a hint_result JSON
@@ -189,7 +189,7 @@ public class GameController {
 
         if (actorName == null || actorName.trim().isEmpty()) {
             String message = URLEncoder.encode("Please enter an actor name.", StandardCharsets.UTF_8);
-            return "redirect:/game?error=" + message;
+            return "redirect:/?error=" + message;
         }
 
         int userId = Integer.parseInt(userService.getLoggedInUser().getUserId());
@@ -220,7 +220,7 @@ public class GameController {
                     answerProfession = rs.getString("primary_profession");
                 } else {
                     String message = URLEncoder.encode("No game found for today.", StandardCharsets.UTF_8);
-                    return "redirect:/game?error=" + message;
+                    return "redirect:/?error=" + message;
                 }
             }
 
@@ -249,7 +249,7 @@ public class GameController {
             // Guard: game already over
             if (alreadySolved || guessesUsed >= 6) {
                 String message = URLEncoder.encode("You have already finished today's game.", StandardCharsets.UTF_8);
-                return "redirect:/game?error=" + message;
+                return "redirect:/?error=" + message;
             }
 
             // -- Step 3: Look up the guessed actor by name --
@@ -287,7 +287,7 @@ public class GameController {
                 String message = URLEncoder.encode(
                     "Actor \"" + actorName + "\" not found. Check the spelling and try again.",
                     StandardCharsets.UTF_8);
-                return "redirect:/game?error=" + message;
+                return "redirect:/?error=" + message;
             }
 
             // -- Step 4: Compare attributes and build hint_result JSON --
@@ -421,10 +421,10 @@ public class GameController {
         } catch (SQLException e) {
             e.printStackTrace();
             String message = URLEncoder.encode("Failed to submit guess. Please try again.", StandardCharsets.UTF_8);
-            return "redirect:/game?error=" + message;
+            return "redirect:/?error=" + message;
         }
 
-        return "redirect:/game";
+        return "redirect:/";
     }
 
 }

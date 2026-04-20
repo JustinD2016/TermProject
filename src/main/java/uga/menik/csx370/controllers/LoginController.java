@@ -81,7 +81,7 @@ public class LoginController {
 
         if (isAuthenticated) {
             // Redirect to home page if authentication is successful.
-            return "redirect:/game";
+            return "redirect:/";
         } else {
             // Redirect back to the login page with an error message if authentication
             // fails.
