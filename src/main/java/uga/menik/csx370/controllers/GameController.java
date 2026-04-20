@@ -51,7 +51,6 @@ public class GameController {
 
         int userId = Integer.parseInt(userService.getLoggedInUser().getUserId());
 
-        // -- Step 1: Get today's daily game --
         final String getDailyGameSql =
             "SELECT game_id, actor_id FROM daily_game WHERE game_date = CURDATE()";
 
@@ -66,7 +65,6 @@ public class GameController {
                 gameId = rs.getInt("game_id");
                 answerActorId = rs.getString("actor_id");
             } else {
-                // No game scheduled for today
                 mv.addObject("isNoContent", true);
                 mv.addObject("errorMessage", "No game available for today. Check back soon!");
                 return mv;
@@ -78,7 +76,6 @@ public class GameController {
             return new ModelAndView("redirect:/game?error=" + message);
         }
 
-        // -- Step 2: Find or create a game_session for this user + today's game --
         final String getSessionSql =
             "SELECT session_id, guesses_used, solved FROM game_session " +
             "WHERE user_id = ? AND game_id = ?";
@@ -101,7 +98,6 @@ public class GameController {
                 }
             }
 
-            // No session yet — create one
             if (sessionId == -1) {
                 final String insertSessionSql =
                     "INSERT INTO game_session (user_id, game_id, guesses_used, solved) " +
@@ -128,15 +124,8 @@ public class GameController {
             return new ModelAndView("redirect:/game?error=" + message);
         }
 
-        // -- Step 3: Fetch all guesses made so far in this session --
         final String getGuessesSql =
-            "SELECT g.guess_number, " +
-            "       a.first_name, " +
-            "       a.last_name, " +
-            "       a.birth_year, " +
-            "       a.death_year, " +
-            "       a.primary_profession, " +
-            "       g.hint_result " +
+            "SELECT g.guess_number, a.first_name, a.last_name, a.birth_year, a.death_year, a.primary_profession, g.hint_result " +
             "FROM guess g " +
             "JOIN actor a ON a.actor_id = g.guessed_actor_id " +
             "WHERE g.session_id = ? " +
@@ -171,7 +160,6 @@ public class GameController {
             return new ModelAndView("redirect:/game?error=" + message);
         }
 
-        // -- Step 4: Pass data to template --
         mv.addObject("sessionId", sessionId);
         mv.addObject("guessesUsed", guessesUsed);
         mv.addObject("guessesRemaining", 6 - guessesUsed);
@@ -180,7 +168,6 @@ public class GameController {
         mv.addObject("gameOver", solved || guessesUsed >= 6);
         mv.addObject("errorMessage", error);
 
-        // Only reveal the answer if the game is over
         if (solved || guessesUsed >= 6) {
             mv.addObject("answerActorId", answerActorId);
         }
@@ -217,8 +204,7 @@ public class GameController {
             String answerProfession = null;
 
             final String getDailyGameSql =
-                "SELECT dg.game_id, dg.actor_id, " +
-                "       a.birth_year, a.death_year, a.primary_profession " +
+                "SELECT dg.game_id, dg.actor_id, a.birth_year, a.death_year, a.primary_profession " +
                 "FROM daily_game dg " +
                 "JOIN actor a ON a.actor_id = dg.actor_id " +
                 "WHERE dg.game_date = CURDATE()";
