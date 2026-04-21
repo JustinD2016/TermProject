@@ -13,14 +13,14 @@
         <!-- Game header -->
         <div class="center-align">
             <h2>Today's Actor</h2>
-            <p>Guess the mystery actor. You have {6-{guessesUsed}} attempts left.</p>
+            <p>Guess the mystery actor. You have 6 attempts.</p>
             <p>Guesses used: <strong>{{guessesUsed}}</strong> / 6</p>
         </div>
 
         <!-- Guess input form - hidden when game is over -->
         {{^gameOver}}
         <div class="post-form">
-            <form method="post" action="/game/guess">
+            <form method="post" action="/guess">
                 <input name="actorname" class="short-input full" type="text"
                        placeholder="Enter actor full name (e.g. Bryan Cranston)" required>
                 <button type="submit" class="action-button">Submit Guess</button>
@@ -37,7 +37,7 @@
             {{/solved}}
             {{^solved}}
             <p><strong>Better luck tomorrow!</strong></p>
-            <p>The answer was: <strong>{{answerActorId}}</strong></p>
+            <p>The answer was: <strong>{{answerActor.firstName}} {{answerActor.lastName}}</strong></p>
             {{/solved}}
         </div>
         {{/gameOver}}
@@ -50,7 +50,7 @@
         {{/isNoContent}}
 
         <!-- Guesses table -->
-        {{#guesses}}
+        {{^isNoContent}}
         <div class="container framed">
             <table class="full">
                 <thead>
@@ -79,7 +79,7 @@
                 </tbody>
             </table>
         </div>
-        {{/guesses}}
+        {{/isNoContent}}
 
     </div>
 

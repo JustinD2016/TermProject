@@ -71,6 +71,8 @@ public class GameController {
             boolean gameOver = session.isSolved() || session.getGuessesUsed() >= 6;
 
             mv.addObject("session", session);
+            mv.addObject("guesses", session.getGuesses());
+            mv.addObject("guessesUsed", session.getGuessesUsed());
             mv.addObject("guessesRemaining", 6 - session.getGuessesUsed());
             mv.addObject("gameOver", gameOver);
             mv.addObject("isNoContent", session.getGuesses().isEmpty());
