@@ -22,11 +22,11 @@ import uga.menik.csx370.services.GameService;
 import uga.menik.csx370.services.UserService;
 
 /**
- * Handles HTTP for the game page — the home page of ActorDle.
- * All business logic is delegated to GameService.
- *
- * GET  /       -> load today's session and render the game page
- * POST /guess  -> submit a guess and redirect back
+ * Controller for handling the game, we gotta figure out a good name for it guys.
+ * Handles the page load and guess submission for the daily actor guessing game. 
+ * On page load, it checks if a session exists for the user + today's game, and loads it if found. 
+ * If no session exists, it creates a new one. It also handles error messages passed via query params on redirect. 
+ * On guess submission, it validates the input, looks up the guessed actor, checks the guess against the answer, updates the session and stats, and redirects back.
  */
 @Controller
 @RequestMapping("/")
@@ -42,9 +42,12 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    // -------------------------------------------------------------------------
-    // GET /
-    // -------------------------------------------------------------------------
+    /**
+     * Loads the game page. If a session exists for the user + today's game, it is loaded and rendered.
+     * Otherwise, a new session is created. If no game is scheduled for today, an appropriate message is shown.
+     * @param error Optional error message to display (passed via query param on redirect)
+     * @return ModelAndView for the game page, with session data and any error message included in the model
+     */
     @GetMapping
     public ModelAndView webpage(@RequestParam(name = "error", required = false) String error) {
         ModelAndView mv = new ModelAndView("game_page");
@@ -62,7 +65,7 @@ public class GameController {
                 return mv;
             }
 
-            // Find or create the session — loads all prior guesses
+            // Find or create the session - loads all prior guesses
             GameSession session = gameService.getOrCreateSession(conn, userId, gameId);
 
             boolean gameOver = session.isSolved() || session.getGuessesUsed() >= 6;
@@ -89,9 +92,11 @@ public class GameController {
         return mv;
     }
 
-    // -------------------------------------------------------------------------
-    // POST /guess
-    // -------------------------------------------------------------------------
+    /**
+     * Handles submission of a guess. Validates input, looks up the guessed actor, checks the guess against the answer,
+     * @param actorName The guessed actor name, expected in "First Last" format. The controller will attempt to parse this into first and last name for lookup.
+     * @return Redirect back to the game page, with an error message if the guess was invalid or if any issues occurred during processing
+     */
     @PostMapping("/guess")
     public String submitGuess(@RequestParam(name = "actorname") String actorName) {
 
@@ -113,7 +118,7 @@ public class GameController {
                 return "redirect:/?error=" + message;
             }
 
-            // Get current session — check it isn't already over
+            // Get current session - check it isn't already over
             GameSession session = gameService.getOrCreateSession(conn, userId, gameId);
 
             if (session.isSolved() || session.getGuessesUsed() >= 6) {

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> fragments/html_header}}
+
+<body>
+
+    {{> fragments/top_bar}}
+
+    <div class="container framed">
+
+        {{> fragments/error_message}}
+
+        <!-- Game header -->
+        <div class="center-align">
+            <h2>Today's Actor</h2>
+            <p>Guess the mystery actor. You have {6-{guessesUsed}} attempts left.</p>
+            <p>Guesses used: <strong>{{guessesUsed}}</strong> / 6</p>
+        </div>
+
+        <!-- Guess input form - hidden when game is over -->
+        {{^gameOver}}
+        <div class="post-form">
+            <form method="post" action="/game/guess">
+                <input name="actorname" class="short-input full" type="text"
+                       placeholder="Enter actor full name (e.g. Bryan Cranston)" required>
+                <button type="submit" class="action-button">Submit Guess</button>
+            </form>
+            <div class="clear"></div>
+        </div>
+        {{/gameOver}}
+
+        <!-- Game over message -->
+        {{#gameOver}}
+        <div class="center-align">
+            {{#solved}}
+            <p><strong>You got it!</strong> Well done.</p>
+            {{/solved}}
+            {{^solved}}
+            <p><strong>Better luck tomorrow!</strong></p>
+            <p>The answer was: <strong>{{answerActorId}}</strong></p>
+            {{/solved}}
+        </div>
+        {{/gameOver}}
+
+        <!-- No guesses yet -->
+        {{#isNoContent}}
+        <div class="center-align">
+            <p>No guesses yet. Start guessing above!</p>
+        </div>
+        {{/isNoContent}}
+
+        <!-- Guesses table -->
+        {{#guesses}}
+        <div class="container framed">
+            <table class="full">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Birth Year</th>
+                        <th>Death Year</th>
+                        <th>Profession</th>
+                        <th>Hints</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#guesses}}
+                    <tr>
+                        <td>{{guessNumber}}</td>
+                        <td>{{firstName}}</td>
+                        <td>{{lastName}}</td>
+                        <td>{{birthYear}}</td>
+                        <td>{{deathYear}}</td>
+                        <td>{{profession}}</td>
+                        <td>{{hintResult}}</td>
+                    </tr>
+                    {{/guesses}}
+                </tbody>
+            </table>
+        </div>
+        {{/guesses}}
+
+    </div>
+
+    {{> fragments/footer}}
+
+</body>
+
+</html>
