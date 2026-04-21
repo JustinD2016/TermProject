@@ -76,6 +76,7 @@ public class GameController {
             mv.addObject("guessesRemaining", 6 - session.getGuessesUsed());
             mv.addObject("gameOver", gameOver);
             mv.addObject("isNoContent", session.getGuesses().isEmpty());
+            mv.addObject("solved", session.isSolved());
 
             // Only reveal the answer actor once the game is over
             if (gameOver) {
