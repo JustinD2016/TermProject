@@ -41,26 +41,32 @@ public class GameService {
         this.dataSource = dataSource;
     }
 
-    // -------------------------------------------------------------------------
-    // Load an Actor with their full Title list by actor_id.
-    // Returns null if the actor is not found.
-    // Used both when loading prior guesses and when looking up the answer actor.
-    // -------------------------------------------------------------------------
+    /**
+     * Loads an Actor by ID, including their list of Titles.
+     * @param conn Database connection to use for the query
+     * @param actorId ID of the actor to load
+     * @return Actor object with all fields populated, or null if no actor found with that ID
+     * @throws SQLException if a database access error occurs
+     */
     public Actor loadActor(Connection conn, String actorId) throws SQLException {
+        // Query for actor details
         final String actorSql =
             "SELECT actor_id, first_name, last_name, primary_profession, " +
             "       birth_year, death_year " +
             "FROM actor WHERE actor_id = ?";
 
+        // Query for titles associated with this actor
         final String titleSql =
             "SELECT t.title_id, t.primary_title, t.title_type, t.start_year, t.genres " +
             "FROM actor_title at " +
             "JOIN title t ON t.title_id = at.title_id " +
             "WHERE at.actor_id = ?";
 
+        // First pull the actor query 
         try (PreparedStatement pstmt = conn.prepareStatement(actorSql)) {
+            //set the actor id to the prepared statement for the title query to pull all titles for that actor
             pstmt.setString(1, actorId);
-
+            // Pull the titles associated with the actor and build Title objects for each
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     List<Title> titles = new ArrayList<>();
@@ -100,11 +106,14 @@ public class GameService {
         return null;
     }
 
-    // -------------------------------------------------------------------------
-    // Find today's daily_game row.
-    // Returns int[]{gameId} with gameId = -1 if no game is scheduled today.
-    // -------------------------------------------------------------------------
+    /**
+     * Find today's game_id and answer actor_id from daily_game.
+     * @param conn Database connection to use for the query
+     * @return int array where index 0 is game_id and index 1 is actor_id, or -1 if no game found for today
+     * @throws SQLException if a database access error occurs
+     */
     public int[] getTodaysGame(Connection conn) throws SQLException {
+        // Query for today's game
         final String sql =
             "SELECT game_id, actor_id FROM daily_game WHERE game_date = CURDATE()";
 
@@ -118,9 +127,12 @@ public class GameService {
         return new int[]{ -1 };
     }
 
-    // -------------------------------------------------------------------------
-    // Find today's answer actor_id.
-    // -------------------------------------------------------------------------
+    /**
+     * Find today's answer actor_id from daily_game.
+     * @param conn Database connection to use for the query
+     * @return String or null if no game found for today
+     * @throws SQLException if a database access error occurs
+     */
     public String getTodaysActorId(Connection conn) throws SQLException {
         final String sql =
             "SELECT actor_id FROM daily_game WHERE game_date = CURDATE()";
@@ -135,13 +147,18 @@ public class GameService {
         return null;
     }
 
-    // -------------------------------------------------------------------------
-    // Find or create a GameSession for this user + today's game.
-    // Loads all existing guesses for the session.
-    // -------------------------------------------------------------------------
+    /**
+     * Find an existing GameSession for the user + game, or create one if it doesn't exist.
+     * @param conn Database connection to use for the query
+     * @param userId ID of the user playing the game
+     * @param gameId ID of today's game
+     * @return GameSession object with all fields populated, including a list of Guess objects with full Actor details
+     * @throws SQLException
+     */
     public GameSession getOrCreateSession(Connection conn, int userId, int gameId)
             throws SQLException {
-
+        
+        // First try to find an existing session for this user + game
         final String getSessionSql =
             "SELECT session_id, guesses_used, solved FROM game_session " +
             "WHERE user_id = ? AND game_id = ?";
@@ -197,10 +214,15 @@ public class GameService {
         );
     }
 
-    // -------------------------------------------------------------------------
-    // Load all Guess objects for a session, each with a full Actor.
-    // -------------------------------------------------------------------------
+    /**
+     * Load all guesses for a given session, including the full Actor details for each guessed actor.
+     * @param conn Database connection to use for the query
+     * @param sessionId ID of the game session to load guesses for
+     * @return List of Guess objects with all fields populated
+     * @throws SQLException
+     */
     private List<Guess> loadGuesses(Connection conn, int sessionId) throws SQLException {
+        // Query to get all guesses for this session
         final String sql =
             "SELECT guess_number, guessed_actor_id, hint_result " +
             "FROM guess " +
@@ -211,7 +233,7 @@ public class GameService {
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, sessionId);
-
+            // For each guess, load the full Actor details for the guessed actor and build Guess objects
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Actor actor = loadActor(conn, rs.getString("guessed_actor_id"));
@@ -228,16 +250,12 @@ public class GameService {
         return guesses;
     }
 
-    // -------------------------------------------------------------------------
-    // Compare a guessed Actor against the answer Actor and build a
-    // hint result JSON string.
-    //
-    // birth_year:  "match" | "higher" (answer born later) | "lower" | "unknown"
-    // death_year:  "match" | "higher" | "lower" | "both_alive" | "unknown"
-    // profession:  "match" | "no_match"
-    // correct:     true if this guess is the answer
-    // shared_titles: JSON array of title names that appear in both actors' lists
-    // -------------------------------------------------------------------------
+    /**
+     * Build the hint result JSON by comparing the guessed Actor to the answer Actor.
+     * @param guessed The Actor object representing the user's guess
+     * @param answer The Actor object representing the correct answer for today's game
+     * @return String containing the JSON hint result to be stored in the guess row
+     */
     public String buildHintResult(Actor guessed, Actor answer) {
         boolean isCorrect = guessed.getActorId().equals(answer.getActorId());
 
@@ -289,12 +307,17 @@ public class GameService {
         );
     }
 
-    // -------------------------------------------------------------------------
-    // Submit a guess: insert the guess row, update the session,
-    // and update user_stats if the game just ended.
-    //
-    // Returns true if the guess was the correct answer.
-    // -------------------------------------------------------------------------
+    /**
+     * Process a user's guess by inserting a new guess row, updating the game_session, and if the game is now over, updating user_stats.
+     * @param conn Database connection to use for the queries
+     * @param sessionId ID of the current game session
+     * @param userId ID of the user making the guess
+     * @param guessedActor Actor object representing the user's guessed actor
+     * @param answerActor Actor object representing the correct answer for today's game
+     * @param nextGuessNumber The guess number for this guess (1-6)
+     * @return boolean indicating whether the guess was correct
+     * @throws SQLException
+     */
     public boolean submitGuess(Connection conn, int sessionId, int userId,
                                Actor guessedActor, Actor answerActor,
                                int nextGuessNumber) throws SQLException {
@@ -336,10 +359,14 @@ public class GameService {
         return isCorrect;
     }
 
-    // -------------------------------------------------------------------------
-    // Update user_stats after a game ends.
-    // Recalculates win rate, streak, and rolling average guesses.
-    // -------------------------------------------------------------------------
+    /**
+     * Update the user's statistics in user_stats after a game ends.
+     * @param conn  Database connection to use for the queries
+     * @param userId ID of the user whose stats to update
+     * @param won boolean indicating whether the user won the game
+     * @param guessesUsed number of guesses the user used in the game
+     * @throws SQLException if a database access error occurs
+     */
     private void updateStats(Connection conn, int userId, boolean won, int guessesUsed)
             throws SQLException {
 
