@@ -51,6 +51,7 @@
 
         <!-- Guesses table -->
         {{^isNoContent}}
+        
         <div class="container framed">
             <table class="full">
                 <thead>
@@ -61,7 +62,7 @@
                         <th>Birth Year</th>
                         <th>Death Year</th>
                         <th>Profession</th>
-                        <th>Hints</th>
+                        <th>Shared Titles</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,10 +71,10 @@
                         <td>{{guessNumber}}</td>
                         <td>{{firstName}}</td>
                         <td>{{lastName}}</td>
-                        <td>{{birthYear}}</td>
-                        <td>{{deathYear}}</td>
-                        <td>{{profession}}</td>
-                        <td>{{hintResult}}</td>
+                        <td>{{birthYearHint}}</td>
+                        <td>{{deathYearHint}}</td>
+                        <td>{{professionHint}}</td>
+                        <td>{{sharedTitles}}</td>
                     </tr>
                     {{/guesses}}
                 </tbody>
