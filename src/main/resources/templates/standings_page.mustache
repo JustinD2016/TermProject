@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> fragments/html_header}}
+
+<body>
+
+    {{> fragments/top_bar}}
+
+    <div class="container framed">
+
+        {{> fragments/error_message}}
+
+        <!-- Page header -->
+        <div class="center-align">
+            <h2>Standings</h2>
+            <p>See how you stack up against other players.</p>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="center-align">
+            <a href="/standings?filter=all">
+                <button class="action-button">All Players</button>
+            </a>
+            &nbsp;
+            <a href="/standings?filter=friends">
+                <button class="action-button">Friends Only</button>
+            </a>
+        </div>
+
+        {{#isFriendsFilter}}
+        <div class="center-align">
+            <p><em>Showing friends leaderboard</em></p>
+        </div>
+        {{/isFriendsFilter}}
+        {{^isFriendsFilter}}
+        <div class="center-align">
+            <p><em>Showing global leaderboard</em></p>
+        </div>
+        {{/isFriendsFilter}}
+
+        <!-- No data message -->
+        {{#isNoContent}}
+        <div class="center-align">
+            <p>No standings data available yet. Play some games!</p>
+        </div>
+        {{/isNoContent}}
+
+        <!-- Standings table -->
+        {{^isNoContent}}
+        <div class="container framed">
+            <table class="full">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Games Played</th>
+                        <th>Games Won</th>
+                        <th>Win Rate (%)</th>
+                        <th>Current Streak</th>
+                        <th>Best Streak</th>
+                        <th>Avg Guesses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#standings}}
+                    <tr>
+                        <td>{{rank}}</td>
+                        <td>{{username}}</td>
+                        <td>{{gamesPlayed}}</td>
+                        <td>{{gamesWon}}</td>
+                        <td>{{winRate}}</td>
+                        <td>{{currentStreak}}</td>
+                        <td>{{maxStreak}}</td>
+                        <td>{{avgGuesses}}</td>
+                    </tr>
+                    {{/standings}}
+                </tbody>
+            </table>
+        </div>
+        {{/isNoContent}}
+
+    </div>
+
+    {{> fragments/footer}}
+
+</body>
+
+</html>
