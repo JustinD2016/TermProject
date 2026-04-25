@@ -1,7 +1,5 @@
 package uga.menik.csx370.controllers;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,10 +19,6 @@ import org.springframework.web.servlet.ModelAndView;
 import uga.menik.csx370.models.UserStats;
 import uga.menik.csx370.services.UserService;
 
-/**
- * Controller for the standings/leaderboard page at /standings.
- * Shows global rankings and optionally filters to only followed users.
- */
 @Controller
 @RequestMapping("/standings")
 public class StandingsController {
@@ -38,13 +32,6 @@ public class StandingsController {
         this.userService = userService;
     }
 
-    /**
-     * Serves the standings page. Supports filtering between all users and
-     * only users the logged-in user follows via the "filter" query param.
-     *
-     * @param filter "friends" to show only followed users, anything else shows all
-     * @param error  Optional error message passed via query param
-     */
     @GetMapping
     public ModelAndView webpage(
             @RequestParam(name = "filter", required = false, defaultValue = "all") String filter,
@@ -52,44 +39,41 @@ public class StandingsController {
 
         ModelAndView mv = new ModelAndView("standings_page");
         int loggedInUserId = Integer.parseInt(userService.getLoggedInUser().getUserId());
+        String currentUsername = userService.getLoggedInUser().getUsername();
 
-        // Two queries: one for all users, one filtered to friends only
         final String allUsersSql =
             "SELECT u.username, " +
-            "       us.games_played, " +
-            "       us.games_won, " +
-            "       ROUND(us.games_won * 100.0 / NULLIF(us.games_played, 0), 1) AS win_rate, " +
-            "       us.current_streak, " +
-            "       us.max_streak, " +
-            "       us.avg_guesses, " +
-            "       RANK() OVER (ORDER BY us.games_won DESC, us.avg_guesses ASC) AS rank " +
-            "FROM user_stats us " +
-            "JOIN user u ON us.user_id = u.user_id " +
-            "ORDER BY rank ASC " +
-            "LIMIT 100";
+            "us.games_played, us.games_won, " +
+            "ROUND(us.games_won * 100.0 / NULLIF(us.games_played, 0), 1) AS win_rate, " +
+            "us.current_streak, us.max_streak, us.avg_guesses, " +
+            "RANK() OVER (ORDER BY us.games_won DESC, us.avg_guesses ASC) AS user_rank " +
+            "FROM user_stats us JOIN user u ON us.user_id = u.user_id " +
+            "ORDER BY user_rank ASC LIMIT 100";
 
         final String friendsSql =
             "SELECT u.username, " +
-            "       us.games_played, " +
-            "       us.games_won, " +
-            "       ROUND(us.games_won * 100.0 / NULLIF(us.games_played, 0), 1) AS win_rate, " +
-            "       us.current_streak, " +
-            "       us.max_streak, " +
-            "       us.avg_guesses, " +
-            "       RANK() OVER (ORDER BY us.games_won DESC, us.avg_guesses ASC) AS rank " +
-            "FROM user_stats us " +
-            "JOIN user u ON us.user_id = u.user_id " +
-            "WHERE us.user_id = ? " +
-            "   OR us.user_id IN ( " +
-            "       SELECT followee_id FROM follow WHERE follower_id = ? " +
-            "   ) " +
-            "ORDER BY rank ASC";
+            "us.games_played, us.games_won, " +
+            "ROUND(us.games_won * 100.0 / NULLIF(us.games_played, 0), 1) AS win_rate, " +
+            "us.current_streak, us.max_streak, us.avg_guesses, " +
+            "RANK() OVER (ORDER BY us.games_won DESC, us.avg_guesses ASC) AS user_rank " +
+            "FROM user_stats us JOIN user u ON us.user_id = u.user_id " +
+            "WHERE us.user_id = ? OR us.user_id IN " +
+            "(SELECT followee_id FROM follow WHERE follower_id = ?) " +
+            "ORDER BY user_rank ASC";
+
+        // Query current user's own stats for the pie chart
+        final String myStatsSql =
+            "SELECT games_won, (games_played - games_won) AS games_lost " +
+            "FROM user_stats WHERE user_id = ?";
 
         boolean isFriendsFilter = "friends".equalsIgnoreCase(filter);
         List<UserStats> standings = new ArrayList<>();
+        int myWins = 0;
+        int myLosses = 0;
 
         try (Connection conn = dataSource.getConnection()) {
 
+            // Load leaderboard
             PreparedStatement pstmt;
             if (isFriendsFilter) {
                 pstmt = conn.prepareStatement(friendsSql);
@@ -109,24 +93,39 @@ public class StandingsController {
                         rs.getInt("current_streak"),
                         rs.getInt("max_streak"),
                         rs.getDouble("avg_guesses"),
-                        rs.getInt("rank")
+                        rs.getInt("user_rank")
                     ));
                 }
             }
-
             pstmt.close();
+
+            // Load current user's stats for pie chart
+            try (PreparedStatement ps2 = conn.prepareStatement(myStatsSql)) {
+                ps2.setInt(1, loggedInUserId);
+                try (ResultSet rs2 = ps2.executeQuery()) {
+                    if (rs2.next()) {
+                        myWins = rs2.getInt("games_won");
+                        myLosses = rs2.getInt("games_lost");
+                    }
+                }
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            String message = URLEncoder.encode("Failed to load standings. Please try again.",
-                    StandardCharsets.UTF_8);
-            return new ModelAndView("redirect:/standings?error=" + message);
+            mv.addObject("standings", standings);
+            mv.addObject("isNoContent", true);
+            mv.addObject("isFriendsFilter", isFriendsFilter);
+            mv.addObject("errorMessage", "Failed to load standings: " + e.getMessage());
+            return mv;
         }
 
         mv.addObject("standings", standings);
         mv.addObject("isNoContent", standings.isEmpty());
         mv.addObject("isFriendsFilter", isFriendsFilter);
         mv.addObject("errorMessage", error);
+        mv.addObject("currentUsername", currentUsername);
+        mv.addObject("myWins", myWins);
+        mv.addObject("myLosses", myLosses);
 
         return mv;
     }

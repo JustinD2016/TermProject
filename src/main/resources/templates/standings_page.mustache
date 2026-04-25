@@ -28,15 +28,17 @@
         </div>
 
         {{#isFriendsFilter}}
-        <div class="center-align">
-            <p><em>Showing friends leaderboard</em></p>
-        </div>
+        <div class="center-align"><p><em>Showing friends leaderboard</em></p></div>
         {{/isFriendsFilter}}
         {{^isFriendsFilter}}
-        <div class="center-align">
-            <p><em>Showing global leaderboard</em></p>
-        </div>
+        <div class="center-align"><p><em>Showing global leaderboard</em></p></div>
         {{/isFriendsFilter}}
+
+        <!-- Pie chart for current user's win/loss -->
+        <div class="center-align" style="margin: 20px auto; max-width: 260px;">
+            <h3>Your Win / Loss</h3>
+            <canvas id="winLossChart" width="220" height="220"></canvas>
+        </div>
 
         <!-- No data message -->
         {{#isNoContent}}
@@ -48,7 +50,7 @@
         <!-- Standings table -->
         {{^isNoContent}}
         <div class="container framed">
-            <table class="full">
+            <table class="full" id="standings-table">
                 <thead>
                     <tr>
                         <th>Rank</th>
@@ -63,7 +65,7 @@
                 </thead>
                 <tbody>
                     {{#standings}}
-                    <tr>
+                    <tr data-username="{{username}}">
                         <td>{{rank}}</td>
                         <td>{{username}}</td>
                         <td>{{gamesPlayed}}</td>
@@ -83,6 +85,40 @@
 
     {{> fragments/footer}}
 
-</body>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script>
+        // Highlight current user's row
+        var currentUsername = "{{currentUsername}}";
+        document.querySelectorAll("#standings-table tbody tr").forEach(function(row) {
+            if (row.getAttribute("data-username") === currentUsername) {
+                row.style.backgroundColor = "#d4edda";
+                row.style.fontWeight = "bold";
+            }
+        });
 
+        // Pie chart
+        var wins = {{myWins}};
+        var losses = {{myLosses}};
+        var ctx = document.getElementById("winLossChart").getContext("2d");
+        new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: ["Wins", "Losses"],
+                datasets: [{
+                    data: [wins, losses],
+                    backgroundColor: ["#28a745", "#dc3545"],
+                    borderColor: ["#ffffff", "#ffffff"],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+    </script>
+
+</body>
 </html>
