@@ -40,7 +40,6 @@ public class PeopleController {
 
     // Inject UserService and PeopleService instances.
     // See LoginController.java to see how to do this.
-    // Hint: Add a constructor with @Autowired annotation.
     @Autowired
     public PeopleController(UserService userService, PeopleService peopleService, DataSource dataSource) {
         this.userService = userService;
@@ -52,7 +51,6 @@ public class PeopleController {
      * 
      * Note that this accepts a URL parameter called error.
      * The value to this parameter can be shown to the user as an error message.
-     * See notes in HashtagSearchController.java regarding URL parameters.
      */
     @GetMapping
     public ModelAndView webpage(@RequestParam(name = "error", required = false) String error) {
@@ -72,9 +70,6 @@ public class PeopleController {
         String errorMessage = error;
         mv.addObject("errorMessage", errorMessage);
 
-        // Enable the following line if you want to show no content message.
-        // Do that if your content list is empty.
-        // mv.addObject("isNoContent", true);
         
         return mv;
     }
@@ -84,7 +79,6 @@ public class PeopleController {
      * Note the URL has parameters defined as variables ie: {userId} and {isFollow}.
      * Follow and unfollow is handled by submitting a get type form to this URL 
      * by specifing the userId and the isFollow variables.
-     * Learn more here: https://www.w3schools.com/tags/att_form_method.asp
      * An example URL that is handled by this function looks like below:
      * http://localhost:8081/people/1/follow/false
      * The above URL assigns 1 to userId and false to isFollow.
@@ -96,12 +90,12 @@ public class PeopleController {
         System.out.println("\tuserId: " + userId);
         System.out.println("\tisFollow: " + isFollow);
         if (isFollow) {
-           final String sql = "INSERT INTO follow (followerId, followeeId) VALUES (?, ?)";
+           final String sql = "INSERT INTO follow (follower_Id, followee_Id) VALUES (?, ?)";
            try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setInt(1, Integer.parseInt(userId));
-            pstmt.setInt(2, Integer.parseInt(userService.getLoggedInUser().getUserId()));
+            pstmt.setInt(1, Integer.parseInt(userService.getLoggedInUser().getUserId()));
+            pstmt.setInt(2, Integer.parseInt(userId));
             
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -111,12 +105,12 @@ public class PeopleController {
             e.printStackTrace();
         }
         } else {
-            final String sql = "DELETE FROM follow WHERE followerId = ? AND followeeId = ?";
+            final String sql = "DELETE FROM follow WHERE follower_Id = ? AND followee_Id = ?";
             try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setInt(1, Integer.parseInt(userId));
-            pstmt.setInt(2, Integer.parseInt(userService.getLoggedInUser().getUserId()));
+            pstmt.setInt(1, Integer.parseInt(userService.getLoggedInUser().getUserId()));
+            pstmt.setInt(2, Integer.parseInt(userId));
             
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
