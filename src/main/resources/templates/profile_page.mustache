@@ -18,6 +18,39 @@
         <div class="center-align">
             <p><strong>{{followingCount}}</strong> Following &nbsp;|&nbsp; <strong>{{followerCount}}</strong> Followers</p>
         </div>
+
+        <div class="container framed">
+    <h3>Today's Game</h3>
+    {{#todayPlayed}}
+        {{#todaySolved}}
+            <p> Solved in <strong>{{todayGuessesUsed}}</strong> guess(es)!</p>
+        {{/todaySolved}}
+        {{^todaySolved}}
+            <p> Not solved today — better luck tomorrow!</p>
+        {{/todaySolved}}
+    {{/todayPlayed}}
+    {{^todayPlayed}}
+        <p>You haven't played today's game yet!</p>
+    {{/todayPlayed}}
+</div>
+
+<div class="container framed">
+    <h3>Friends' Activity Today</h3>
+    {{#followingStatus}}
+    <p>
+        <strong>{{username}}</strong> —
+        {{#played}}
+            {{#solved}} Solved in {{guessesUsed}} guess(es){{/solved}}
+            {{^solved}} Played but didn't solve{{/solved}}
+        {{/played}}
+        {{^played}} Hasn't played yet{{/played}}
+    </p>
+    {{/followingStatus}}
+    {{^followingStatus}}
+    <p>You aren't following anyone yet.</p>
+    {{/followingStatus}}
+</div>
+
     </div>
 
     {{> fragments/footer}}
