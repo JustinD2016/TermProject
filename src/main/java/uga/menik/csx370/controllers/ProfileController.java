@@ -24,21 +24,44 @@ import uga.menik.csx370.services.UserService;
 @RequestMapping("/profile")
 public class ProfileController {
  
+    private final DataSource dataSource;
     private final UserService userService;
- 
+
     @Autowired
-    public ProfileController(UserService userService) {
+    public ProfileController(DataSource dataSource, UserService userService) {
+        this.dataSource = dataSource;
         this.userService = userService;
     }
  
     @GetMapping
     public ModelAndView webpage(@RequestParam(name = "error", required = false) String error) {
         ModelAndView mv = new ModelAndView("profile_page");
- 
+        int userId = Integer.parseInt(userService.getLoggedInUser().getUserId());
         mv.addObject("username", userService.getLoggedInUser().getUsername());
+        try (Connection conn = dataSource.getConnection()) {
+
+            final String followingCount = "SELECT COUNT(*) FROM follow WHERE follower_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(followingCount)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    mv.addObject("followingCount", rs.next() ? rs.getInt(1) : 0);
+                }
+            }
+            final String followerCount = "SELECT COUNT(*) FROM follow WHERE followee_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(followerCount)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    mv.addObject("followerCount", rs.next() ? rs.getInt(1):0);
+                }
+            }
+       
+        } catch (SQLException e) {
+        e.printStackTrace();
+        mv.addObject("errorMessage", "Failed to load profile data.");
+   
+        }
         mv.addObject("errorMessage", error);
- 
         return mv;
-    }
  
+    }
 }
