@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> fragments/html_header}}
+
+<body>
+
+    {{> fragments/top_bar}}
+
+    <div class="container framed">
+
+        {{> fragments/error_message}}
+
+        <!-- Page header -->
+        <div class="center-align">
+            <h2>Standings</h2>
+            <p>See how you stack up against other players.</p>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="center-align">
+            <a href="/standings?filter=all">
+                <button class="action-button">All Players</button>
+            </a>
+            &nbsp;
+            <a href="/standings?filter=friends">
+                <button class="action-button">Friends Only</button>
+            </a>
+        </div>
+
+        {{#isFriendsFilter}}
+        <div class="center-align"><p><em>Showing friends leaderboard</em></p></div>
+        {{/isFriendsFilter}}
+        {{^isFriendsFilter}}
+        <div class="center-align"><p><em>Showing global leaderboard</em></p></div>
+        {{/isFriendsFilter}}
+
+        <!-- Pie chart for current user's win/loss -->
+        <div class="center-align" style="margin: 20px auto; max-width: 260px;">
+            <h3>Your Win / Loss</h3>
+            <canvas id="winLossChart" width="220" height="220"></canvas>
+        </div>
+
+        <!-- No data message -->
+        {{#isNoContent}}
+        <div class="center-align">
+            <p>No standings data available yet. Play some games!</p>
+        </div>
+        {{/isNoContent}}
+
+        <!-- Standings table -->
+        {{^isNoContent}}
+        <div class="container framed">
+            <table class="full" id="standings-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Games Played</th>
+                        <th>Games Won</th>
+                        <th>Win Rate (%)</th>
+                        <th>Current Streak</th>
+                        <th>Best Streak</th>
+                        <th>Avg Guesses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#standings}}
+                    <tr data-username="{{username}}">
+                        <td>{{rank}}</td>
+                        <td>{{username}}</td>
+                        <td>{{gamesPlayed}}</td>
+                        <td>{{gamesWon}}</td>
+                        <td>{{winRate}}</td>
+                        <td>{{currentStreak}}</td>
+                        <td>{{maxStreak}}</td>
+                        <td>{{avgGuesses}}</td>
+                    </tr>
+                    {{/standings}}
+                </tbody>
+            </table>
+        </div>
+        {{/isNoContent}}
+
+    </div>
+
+    {{> fragments/footer}}
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script>
+        // Highlight current user's row
+        var currentUsername = "{{currentUsername}}";
+        document.querySelectorAll("#standings-table tbody tr").forEach(function(row) {
+            if (row.getAttribute("data-username") === currentUsername) {
+                row.style.backgroundColor = "#d4edda";
+                row.style.fontWeight = "bold";
+            }
+        });
+
+        // Pie chart
+        var wins = {{myWins}};
+        var losses = {{myLosses}};
+        var ctx = document.getElementById("winLossChart").getContext("2d");
+        new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: ["Wins", "Losses"],
+                datasets: [{
+                    data: [wins, losses],
+                    backgroundColor: ["#28a745", "#dc3545"],
+                    borderColor: ["#ffffff", "#ffffff"],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
