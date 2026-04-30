@@ -1,16 +1,14 @@
--- ============================================================
+-- CSCI 4360 Databse Management 
+-- Instructor: Dr. Sami Menik
+-- Due Date: May 4th 2026
+
 --  ActorDle - IMDb Actor Guessing Game
---  Database Setup Script (MySQL)
--- ============================================================
---  Entity sets: USER, USER_STATS, FOLLOW, ACTOR, TITLE,
---               ACTOR_TITLE, DAILY_GAME, GAME_SESSION, GUESS
--- ============================================================
+--  Database Setup Script for MySQL
+--  Entity sets: USER, USER_STATS, FOLLOW, ACTOR, TITLE, ACTOR_TITLE, DAILY_GAME, GAME_SESSION, GUESS
 
 
-
--- ============================================================
 -- 1. USER
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS user (
     user_id       INT           NOT NULL AUTO_INCREMENT,
     username      VARCHAR(50)   NOT NULL,
@@ -24,9 +22,8 @@ CREATE TABLE IF NOT EXISTS user (
     UNIQUE KEY uq_user_email    (email)
 );
 
--- ============================================================
 -- 2. USER_STATS
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS user_stats (
     stat_id        INT          NOT NULL AUTO_INCREMENT,
     user_id        INT          NOT NULL,
@@ -43,9 +40,8 @@ CREATE TABLE IF NOT EXISTS user_stats (
         ON DELETE CASCADE
 );
 
--- ============================================================
--- 3. FOLLOW  (Twitter-style, one-way)
--- ============================================================
+-- 3. FOLLOW  not friends
+
 CREATE TABLE IF NOT EXISTS follow (
     follower_id INT      NOT NULL,
     followee_id INT      NOT NULL,
@@ -64,9 +60,8 @@ CREATE TABLE IF NOT EXISTS follow (
 
 CREATE INDEX idx_follow_followee ON follow (followee_id);
 
--- ============================================================
 -- 4. ACTOR
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS actor (
     actor_id           VARCHAR(20)  NOT NULL,
     first_name         VARCHAR(100) NOT NULL,
@@ -81,9 +76,9 @@ CREATE TABLE IF NOT EXISTS actor (
 CREATE INDEX idx_actor_last_name  ON actor (last_name);
 CREATE INDEX idx_actor_birth_year ON actor (birth_year);
 
--- ============================================================
--- 5. TITLE
--- ============================================================
+
+-- 5. movie TITLE but just called title to be more general
+
 CREATE TABLE IF NOT EXISTS title (
     title_id        VARCHAR(20)  NOT NULL,
     title_type      VARCHAR(50),
@@ -100,9 +95,8 @@ CREATE TABLE IF NOT EXISTS title (
 
 CREATE INDEX idx_title_primary ON title (primary_title(100));
 
--- ============================================================
--- 6. ACTOR_TITLE  (junction table)
--- ============================================================
+-- 6. ACTOR_TITLE  connecting the actors to their movies
+
 CREATE TABLE IF NOT EXISTS actor_title (
     actor_id VARCHAR(20) NOT NULL,
     title_id VARCHAR(20) NOT NULL,
@@ -118,9 +112,8 @@ CREATE TABLE IF NOT EXISTS actor_title (
 
 CREATE INDEX idx_at_title ON actor_title (title_id);
 
--- ============================================================
--- 7. DAILY_GAME
--- ============================================================
+-- 7. DAILY_GAME filled up every day with a new actor to guess, the actor of the day
+
 CREATE TABLE IF NOT EXISTS daily_game (
     game_id   INT         NOT NULL AUTO_INCREMENT,
     game_date DATE        NOT NULL,
@@ -132,9 +125,8 @@ CREATE TABLE IF NOT EXISTS daily_game (
         FOREIGN KEY (actor_id) REFERENCES actor (actor_id)
 );
 
--- ============================================================
--- 8. GAME_SESSION
--- ============================================================
+-- 8. GAME_SESSION each time a user plays a game, a new session is created to track their progress and guesses for that game.
+
 CREATE TABLE IF NOT EXISTS game_session (
     session_id   INT        NOT NULL AUTO_INCREMENT,
     user_id      INT        NOT NULL,
@@ -154,9 +146,8 @@ CREATE TABLE IF NOT EXISTS game_session (
 
 CREATE INDEX idx_session_game ON game_session (game_id);
 
--- ============================================================
--- 9. GUESS
--- ============================================================
+-- 9. GUESS each guess a user makes in a game session is recorded in this table, along with the hint results for that guess.
+
 CREATE TABLE IF NOT EXISTS guess (
     guess_id         INT         NOT NULL AUTO_INCREMENT,
     session_id       INT         NOT NULL,
@@ -175,4 +166,5 @@ CREATE TABLE IF NOT EXISTS guess (
         CHECK (guess_number BETWEEN 1 AND 6)
 );
 
+-- Indexes to optimize query performance as shown in class
 CREATE INDEX idx_guess_session ON guess (session_id);

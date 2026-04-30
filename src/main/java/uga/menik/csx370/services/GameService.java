@@ -180,7 +180,7 @@ public class GameService {
             }
         }
 
-        // No session yet — create one
+        // No session yet then we create one
         if (sessionId == -1) {
             final String insertSql =
                 "INSERT INTO game_session (user_id, game_id, guesses_used, solved) " +
