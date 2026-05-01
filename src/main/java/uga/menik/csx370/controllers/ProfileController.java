@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import uga.menik.csx370.models.UserStats;
-import uga.menik.csx370.services.GameService;
+
 import uga.menik.csx370.services.UserService;
 
 @Controller
@@ -39,7 +38,7 @@ public class ProfileController {
     public ModelAndView webpage(@RequestParam(name = "error", required = false) String error) {
         ModelAndView mv = new ModelAndView("profile_page");
         int userId = Integer.parseInt(userService.getLoggedInUser().getUserId());
-        System.out.println("logged in userId: " + userId);
+         // System.out.println("logged in userId: " + userId);
         mv.addObject("username", userService.getLoggedInUser().getUsername());
         try (Connection conn = dataSource.getConnection()) {
 
