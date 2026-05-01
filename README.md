@@ -5,7 +5,7 @@ CSX370 Term Project
 Members and Contributions:
 Connor Ray: Implemented the StandingsController.sql, Wrote security.txt, ddl.sql
 
-Jacob Stewart: Created ProfleCOntroller.sql, queries.sql file, Copied database_setup.sql contents into ddl.sql for submission.
+Jacob Stewart: Created ProfleController.sql, queries.sql file, Copied database_setup.sql contents into ddl.sql for submission.
 
 Justin Dorval: [LIST CONTRIBUTIONS HERE]
 
