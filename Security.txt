@@ -1,0 +1,21 @@
+Password Security Approach
+==========================
+ 
+We use BCrypt (via Spring Security Crypto's BCryptPasswordEncoder) to securely 
+hash and store user passwords.
+ 
+When a user registers, their plaintext password is passed to 
+passwordEncoder.encode(password), which generates a BCrypt hash. BCrypt 
+automatically generates and embeds a random salt into the hash string, meaning 
+two users with the same password will have different hashes.
+ 
+The full BCrypt hash is stored in the password_hash column of the user table. 
+The first 29 characters of the hash (the salt prefix) are also stored separately 
+in the salt column for reference.
+ 
+When a user logs in, passwordEncoder.matches(password, storedHash) is called, 
+which extracts the salt from the stored hash and verifies the password without 
+ever storing or comparing plaintext passwords.
+ 
+Plaintext passwords are never stored or logged anywhere in the application.
+ 
