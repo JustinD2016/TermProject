@@ -96,6 +96,20 @@ public class ProfileController {
             }
             mv.addObject("followingStatus", followingStatus);
        
+            final String streak = "SELECT current_streak, max_streak FROM user_stats WHERE user_id = ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(streak)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                    mv.addObject("currentStreak", rs.getInt("current_streak"));
+                    mv.addObject("maxStreak", rs.getInt("max_streak"));
+                } else {
+            mv.addObject("currentStreak", 0);
+            mv.addObject("maxStreak", 0);
+        }
+    }
+}
         } catch (SQLException e) {
         e.printStackTrace();
         mv.addObject("errorMessage", "Failed to load profile data.");
