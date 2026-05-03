@@ -3,7 +3,9 @@ ActorDle: The Daily Actor Guessing Game
 CSX370 Term Project
 
 Members and Contributions:
-Connor Ray: Implemented the StandingsController.sql, Wrote security.txt, ddl.sql
+Connor Ray: Implemented StandingsController.java, standings_page.mustache with leaderboard table, 
+All Players and Friends Only filter, win/loss pie chart, and logged-in user row highlighting. 
+Wrote security.txt and contributed to ddl.sql.
 
 Jacob Stewart: Created ProfleController.sql, queries.sql file, Copied database_setup.sql contents into ddl.sql for submission.
 
