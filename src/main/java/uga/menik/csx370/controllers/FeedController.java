@@ -1,20 +1,14 @@
-/**
-Copyright (c) 2024 Sami Menik, PhD. All rights reserved.
-
-This is a project developed by Dr. Menik to give the students an opportunity to apply database concepts learned in the class in a real world project. Permission is granted to host a running version of this software and to use images or videos of this work solely for the purpose of demonstrating the work to potential employers. Any form of reproduction, distribution, or transmission of the software's source code, in part or whole, without the prior written consent of the copyright owner, is strictly prohibited.
-*/
 package uga.menik.csx370.controllers;
 
 import java.net.URLEncoder;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.List;
-
-
+import java.sql.SQLException;
+import java.sql.Connection;
 import javax.sql.DataSource;
+
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,9 +23,8 @@ import uga.menik.csx370.services.UserService;
 
 import java.util.ArrayList;
 
-
 /**
- * This controller handles the home page and some of it's sub URLs.
+ * Handles /feed URL and its sub urls.
  */
 @Controller
 @RequestMapping("/feed")
@@ -47,12 +40,20 @@ public class FeedController {
         this.gameService = gameService;
     }
 
+    /**
+     * This function handles the /polls URL.
+     */
     @GetMapping
     public ModelAndView webpage(@RequestParam(name = "error", required = false) String error) {
         ModelAndView mv = new ModelAndView("feed_page");
 
-        // Following line populates sample data.
-        // You should replace it with actual data from the database.
+        /**
+         * String sql stores the sql command to reutrn the game session id, the number of guesses used, whether 
+         * or not the game was solved, the time the game was played, the username of the user who played the game,
+         * their user id, the first and last name of the actor guessed, for all games played by the logged in user
+         * and users they follow. The list of games is ordered by the time that the game was played, with the most
+         * recent games first.
+         */
         final String sql = "SELECT " +
             "g.session_id, " +
             "g.guesses_used, " +
@@ -74,6 +75,7 @@ public class FeedController {
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
         String loggedInUserId = userService.getLoggedInUser().getUserId();
+        // Games of players the logged in user follows and their own games.
         pstmt.setInt(1, Integer.parseInt(loggedInUserId));
         pstmt.setInt(2, Integer.parseInt(loggedInUserId));
 

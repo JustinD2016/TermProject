@@ -11,7 +11,7 @@ Justin Dorval: Create Gameserivce.java Actor.java, GameSession.java, Game_page.m
 
 Aaryan Gupta: [LIST CONTRIBUTIONS HERE]
 
-Keaton Brown: [LIST CONTRIBUTIONS HERE]
+Keaton Brown: Created Feed.java, FeedController.java, feed_page.mustache, feed_game_card.mustache, and feed_games_container.mustache. Recorded video and did style adjustments.
 
 Technologies Used:
 - Java 21
