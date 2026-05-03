@@ -1,0 +1,7 @@
+Datasource
+
+The data.sql file is a subset of the Kaggle dataset "IMDb Actors and Movies." This dataset contains a names.csv file, a titles.csv file, and a combined.csv file. The combined file was not used for this project. The dataset can be found at the following URL: https://www.kaggle.com/datasets/rishabjadhav/imdb-actors-and-movies?select=names.csv
+
+The IMDB names CSV contains over 13 million different actors, which is overkill, so we created the generate_data_sql.py file to filter through the names to find actors that us (American college students) would actually know, instead of random German actors we've never heard of. To ensure that this list was not just 1,000 hardcoded names, we also used the title.ratings.tsv file from https://datasets.imdbws.com/ to find popular titles then filter the actors based upon how many truly popular titles they have been in.
+
+The generate_data_sql.py file reads in the ratings, titles, and names files. It first filters titles by type (movie, tvSeries, tvMovie, tvMiniSeries) and keeps only those with 50,000 or more votes on IMDB. It then matches actors to their total vote count across their popular titles and takes the top 1,500 actors. These make up the possible set for the game. Actor-title pairs are created to link the tables together and properly fill the database. After the filtering is complete, the file writes data.sql with INSERT statements to populate the database with actors, titles, and their combinations. This data file may also include statistics and game sessions for the video demonstration.
