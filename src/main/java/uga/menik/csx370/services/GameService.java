@@ -12,6 +12,8 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
+
 
 import uga.menik.csx370.models.Actor;
 import uga.menik.csx370.models.GameSession;
@@ -221,7 +223,7 @@ public class GameService {
      * @return List of Guess objects with all fields populated
      * @throws SQLException
      */
-    private List<Guess> loadGuesses(Connection conn, int sessionId) throws SQLException {
+    public List<Guess> loadGuesses(Connection conn, int sessionId) throws SQLException {
         // Query to get all guesses for this session
         final String sql =
             "SELECT guess_number, guessed_actor_id, hint_result " +
@@ -277,12 +279,35 @@ public class GameService {
             else                                                        deathHint = "lower";
         }
 
-        // Profession
-        String profHint = "no_match";
-        if (guessed.getProfession() != null &&
-            guessed.getProfession().equalsIgnoreCase(answer.getProfession())) {
-            profHint = "match";
+        // Profession - Split the profession strings into lists and compare for any profession matches (there can be multiple).
+        List<String> guessedProfessions = guessed.getProfession() != null
+            ? Arrays.asList(guessed.getProfession().toLowerCase().split(",")) : new ArrayList<>();
+        List<String> answerProfessions  = answer.getProfession() != null
+            ? Arrays.asList(answer.getProfession().toLowerCase().split(",")) : new ArrayList<>();
+
+        StringBuilder incorrectProfessions = new StringBuilder("[");
+        StringBuilder correctProfessions = new StringBuilder("[");
+        boolean firstCorrectProfession = true;
+        boolean firstIncorrectProfession = true;
+
+        for (String p : guessedProfessions) {
+            if (answerProfessions.contains(p.trim())) {
+                if (!firstCorrectProfession) {
+                    correctProfessions.append(",");
+                }
+                correctProfessions.append("\"").append(p.trim()).append("\"");
+                firstCorrectProfession = false;
+            } else {
+                if (!firstIncorrectProfession) {
+                    incorrectProfessions.append(",");
+                }
+                incorrectProfessions.append("\"").append(p.trim()).append("\"");
+                firstIncorrectProfession = false;
+            }
         }
+        
+        correctProfessions.append("]");
+        incorrectProfessions.append("]");
 
         // Shared titles — iterate both Title lists and match on titleId
         StringBuilder titlesJson = new StringBuilder("[");
@@ -302,8 +327,8 @@ public class GameService {
 
         return String.format(
             "{\"correct\":%b,\"birth_year\":\"%s\",\"death_year\":\"%s\"," +
-            "\"profession\":\"%s\",\"shared_titles\":%s}",
-            isCorrect, birthHint, deathHint, profHint, titlesJson
+            "\"correct_professions\":%s,\"incorrect_professions\":%s,\"shared_titles\":%s}",
+            isCorrect, birthHint, deathHint, correctProfessions, incorrectProfessions, titlesJson
         );
     }
 
@@ -405,5 +430,21 @@ public class GameService {
             }
         }
     }
+    // generateDailyGame runs every night at midnight and generates a new game
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void generateDailyGame() {
+        final String sql = "INSERT into daily_game (game_date, actor_id) " +
+                           "SELECT " + 
+                           "CURDATE(), " + 
+                           "a.actor_id " +
+                           "FROM actor a " +
+                           "ORDER BY RAND() LIMIT 1";
 
+        try (Connection conn = dataSource.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

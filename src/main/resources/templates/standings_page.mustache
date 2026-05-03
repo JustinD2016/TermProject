@@ -17,11 +17,11 @@
         </div>
 
         <!-- Filter buttons -->
-        <div class="center-align">
+        <div class="center-align" style="display: flex; justify-content: center; gap: 8pt; align-items: center;">
             <a href="/standings?filter=all">
                 <button class="action-button">All Players</button>
             </a>
-            &nbsp;
+            <span style="color: #98b1c6;">|</span>
             <a href="/standings?filter=friends">
                 <button class="action-button">Friends Only</button>
             </a>
@@ -35,9 +35,15 @@
         {{/isFriendsFilter}}
 
         <!-- Pie chart for current user's win/loss -->
-        <div class="center-align" style="margin: 20px auto; max-width: 260px;">
-            <h3>Your Win / Loss</h3>
-            <canvas id="winLossChart" width="220" height="220"></canvas>
+        <div class="center-align" style="display: flex; justify-content: center; gap: 40px; margin: 20px auto;">
+            <div>
+                <h3>Your Win / Loss</h3>
+                <canvas id="winLossChart" width="220" height="220"></canvas>
+            </div>
+            <div>
+                <h3>{{#isFriendsFilter}}Friends{{/isFriendsFilter}}{{^isFriendsFilter}}All Players{{/isFriendsFilter}} Win / Loss</h3>
+                <canvas id="groupWinLossChart" width="220" height="220"></canvas>
+            </div>
         </div>
 
         <!-- No data message -->
@@ -49,7 +55,7 @@
 
         <!-- Standings table -->
         {{^isNoContent}}
-        <div class="container framed">
+        <div class="framed" style="margin: 16pt;">
             <table class="full" id="standings-table">
                 <thead>
                     <tr>
@@ -118,6 +124,28 @@
                 }
             }
         });
+
+        var groupWins = {{groupWins}};
+        var groupLosses = {{groupLosses}};
+        var ctx2 = document.getElementById("groupWinLossChart").getContext("2d");
+        new Chart(ctx2, {
+            type: "pie",
+            data: {
+                labels: ["Wins", "Losses"],
+                datasets: [{
+                    data: [groupWins, groupLosses],
+                    backgroundColor: ["#28a745", "#dc3545"],
+                    borderColor: ["#ffffff", "#ffffff"],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+
     </script>
 
 </body>

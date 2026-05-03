@@ -45,7 +45,7 @@ public class PeopleService {
 
         final String sql =
             "SELECT u.user_id, u.username, " +
-            "       COALESCE(DATE_FORMAT(gs.last_played, '%b %d, %Y'), 'No games yet') AS lastActivity " +
+            "       COALESCE(DATE_FORMAT(CONVERT_TZ(gs.last_played, '+00:00', '-04:00'), 'Last played on %b %d, %Y'), 'No games played yet') AS lastActivity " +
             "FROM user u " +
             "LEFT JOIN ( " +
             "    SELECT user_id, MAX(played_at) AS last_played " +
@@ -98,7 +98,7 @@ public class PeopleService {
         final String sql =
             "SELECT u.user_id, u.username, " +
             "       gs.solved, gs.guesses_used, " +
-            "       COALESCE(DATE_FORMAT(gs.played_at, '%b %d, %Y, %h:%i %p'), 'Not played today') AS lastActivity " +
+            "       COALESCE(DATE_FORMAT(CONVERT_TZ(gs.last_played, '+00:00', '-04:00'), '%b %d, %Y, %h:%i %p'), 'Not played today') AS lastActivity " +
             "FROM follow f " +
             "JOIN user u ON u.user_id = f.followee_id " +
             "LEFT JOIN game_session gs ON gs.user_id = u.user_id " +

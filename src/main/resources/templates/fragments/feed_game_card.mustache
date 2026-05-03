@@ -1,0 +1,45 @@
+<div class="post framed">
+    <img src="{{avatarFileName}}" alt="User avatar">
+    <div class="post-body">
+        <div class="username" style="font-size: 1.25rem;">{{user}}</div>
+        <div class="post-date" style="font-size: 1.05rem;">{{playedTime}}</div>
+        <div class="post-content" style="font-size: 1.25rem;">
+            <p>Answer: <strong>{{actorFirstName}} {{actorLastName}}</strong></p>
+            {{#solved}}
+                <p>Solved in <strong>{{guessCount}}</strong> / 6 guesses</p>
+            {{/solved}}
+            {{^solved}}
+                <p>Did not solve, all 6 guesses used</p>
+            {{/solved}}
+        </div>
+    </div>
+    <div class="container framed">
+        <table class="full">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Birth Year</th>
+                        <th>Death Year</th>
+                        <th>Profession</th>
+                        <th>Shared Titles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#guesses}}
+                    <tr>
+                        <td>{{guessNumber}}</td>
+                        <td>{{firstName}}</td>
+                        <td>{{lastName}}</td>
+                        <td>{{{birthYearHint}}}</td>
+                        <td>{{{deathYearHint}}}</td>
+                        <td>{{{professionHint}}}</td>
+                        <td>{{sharedTitles}}</td>
+                    </tr>
+                    {{/guesses}}
+                </tbody>
+        </table>
+    </div>
+</div>
+

@@ -119,6 +119,14 @@ public class StandingsController {
             return mv;
         }
 
+
+        int groupWins = 0;
+        int groupLosses = 0;
+        for (UserStats stats : standings) {
+            groupWins += stats.getGamesWon();
+            groupLosses += (stats.getGamesPlayed() - stats.getGamesWon());
+        }
+
         mv.addObject("standings", standings);
         mv.addObject("isNoContent", standings.isEmpty());
         mv.addObject("isFriendsFilter", isFriendsFilter);
@@ -126,6 +134,8 @@ public class StandingsController {
         mv.addObject("currentUsername", currentUsername);
         mv.addObject("myWins", myWins);
         mv.addObject("myLosses", myLosses);
+        mv.addObject("groupWins", groupWins);
+        mv.addObject("groupLosses", groupLosses);
 
         return mv;
     }

@@ -75,7 +75,7 @@ public class ProfileController {
             final String followingStatusStatement = "SELECT u.username, gs.solved, gs.guesses_used " + 
             "FROM follow f JOIN user u ON f.followee_id = user_id " + 
             "LEFT JOIN game_session gs ON gs.user_id = u.user_id " + 
-            "LEFT JOIN daily_game dg ON gs.game_id = dg.game_id AND dg.game_date = CURDATE() " + 
+            "AND gs.game_id = (SELECT game_id FROM daily_game WHERE game_date = CURDATE()) " +
             "WHERE f.follower_id = ?";
             
             List<Map<String, Object>> followingStatus = new ArrayList<>();

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> fragments/html_header}}
+
+<body>
+
+    {{> fragments/top_bar}}
+
+    <div class="container framed">
+
+        {{> fragments/error_message}}
+
+        <div class="center-align">
+            <h2>Activity Feed</h2>
+            <p>Recent played fames from you and users you follow will appear here.</p>
+        </div>
+    </div>
+
+    {{> fragments/no_content_message}}
+
+    {{> fragments/feed_games_container}}
+
+    {{> fragments/footer}}
+
+</body>
+
+</html>

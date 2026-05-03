@@ -7,12 +7,14 @@ package uga.menik.csx370;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * This is the application entry point. Do not change this unless you know 
  * what you are doing.
  */
 @SpringBootApplication
+@EnableScheduling
 public class App 
 {
     public static void main( String[] args )
