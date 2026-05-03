@@ -7,7 +7,7 @@ Connor Ray: Implemented the StandingsController.sql, Wrote security.txt, ddl.sql
 
 Jacob Stewart: Created ProfleController.sql, queries.sql file, Copied database_setup.sql contents into ddl.sql for submission.
 
-Justin Dorval: [LIST CONTRIBUTIONS HERE]
+Justin Dorval: Create Gameserivce.java Actor.java, GameSession.java, Game_page.mustache, GameController.java, Data.sql, Datasource.txt, Generate_data_sql.py, Databasesetup.dql
 
 Aaryan Gupta: [LIST CONTRIBUTIONS HERE]
 
