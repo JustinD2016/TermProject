@@ -74,6 +74,11 @@ SQL/Schema:
 - data.sql (seed data)
 
 Test Accounts:
-Username: [TEST USER 1]  Password: [PASSWORD]
-Username: [TEST USER 2]  Password: [PASSWORD]
-Username: [TEST USER 3]  Password: [PASSWORD]
+Username: demoUser Password: password
+Username: KBrown Password: password
+Username: JDorval Password: password
+Username: AGupta Password: password
+Username: CRay Password: password
+Username: JStewart Password: password
+Username: testuser1  Password: [PASSWORD]
+Username: testuser2  Password: [PASSWORD]
