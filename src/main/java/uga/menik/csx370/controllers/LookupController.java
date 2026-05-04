@@ -42,14 +42,14 @@ public ModelAndView webpage(@RequestParam(name = "actorname", required = false) 
     mv.addObject("searched", true);
     mv.addObject("actorName", actorName);
 
-        String sql =
+        String lookUpSql =
             "SELECT actor_id FROM actor " +
             "WHERE CONCAT(first_name, ' ', last_name) LIKE ? " +
             "ORDER BY last_name, first_name " +
             "LIMIT 1";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(lookUpSql)) {
 
             pstmt.setString(1, "%" + actorName.trim() + "%");
 

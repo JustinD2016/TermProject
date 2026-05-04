@@ -61,4 +61,8 @@ public class Actor {
         return titles;
     }
 
+    public String getDeathYearDisplay() {
+        return deathYear == 0 ? "Alive" : String.valueOf(deathYear);
+    }
+
 }

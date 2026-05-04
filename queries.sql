@@ -256,3 +256,12 @@ final String registerSql =
 -- URL: http://localhost:8080/register
 
 final String statsSql = "INSERT INTO user_stats (user_id) VALUES (?)";
+
+-- Purpose: Query searches an actor by their name using a LIKE match, then loads actors info based on the actor id.
+-- URL: http://localhost:8080/lookup
+
+String lookUpSql =
+            "SELECT actor_id FROM actor " +
+            "WHERE CONCAT(first_name, ' ', last_name) LIKE ? " +
+            "ORDER BY last_name, first_name " +
+            "LIMIT 1";
