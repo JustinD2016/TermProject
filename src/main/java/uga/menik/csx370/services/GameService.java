@@ -116,10 +116,10 @@ public class GameService {
      */
     public int[] getTodaysGame(Connection conn) throws SQLException {
         // Query for today's game
-        final String sql =
+        final String todaysGameSql =
             "SELECT game_id, actor_id FROM daily_game WHERE game_date = CURDATE()";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(todaysGameSql);
              ResultSet rs = pstmt.executeQuery()) {
 
             if (rs.next()) {
@@ -136,10 +136,10 @@ public class GameService {
      * @throws SQLException if a database access error occurs
      */
     public String getTodaysActorId(Connection conn) throws SQLException {
-        final String sql =
+        final String todaysActorSql =
             "SELECT actor_id FROM daily_game WHERE game_date = CURDATE()";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(todaysActorSql);
              ResultSet rs = pstmt.executeQuery()) {
 
             if (rs.next()) {
@@ -225,7 +225,7 @@ public class GameService {
      */
     public List<Guess> loadGuesses(Connection conn, int sessionId) throws SQLException {
         // Query to get all guesses for this session
-        final String sql =
+        final String loadGuessesSql =
             "SELECT guess_number, guessed_actor_id, hint_result " +
             "FROM guess " +
             "WHERE session_id = ? " +
@@ -233,7 +233,7 @@ public class GameService {
 
         List<Guess> guesses = new ArrayList<>();
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(loadGuessesSql)) {
             pstmt.setInt(1, sessionId);
             // For each guess, load the full Actor details for the guessed actor and build Guess objects
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -433,7 +433,7 @@ public class GameService {
     // generateDailyGame runs every night at midnight and generates a new game
     @Scheduled(cron = "0 0 0 * * ?")
     public void generateDailyGame() {
-        final String sql = "INSERT into daily_game (game_date, actor_id) " +
+        final String generateDailySql = "INSERT into daily_game (game_date, actor_id) " +
                            "SELECT " + 
                            "CURDATE(), " + 
                            "a.actor_id " +
@@ -441,7 +441,7 @@ public class GameService {
                            "ORDER BY RAND() LIMIT 1";
 
         try (Connection conn = dataSource.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(generateDailySql)) {
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

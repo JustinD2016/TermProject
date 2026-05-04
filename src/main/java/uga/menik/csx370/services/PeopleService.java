@@ -43,7 +43,7 @@ public class PeopleService {
     public List<FollowableUser> getFollowableUsers(String userIdToExclude) {
         List<FollowableUser> users = new ArrayList<>();
 
-        final String sql =
+        final String followableUsersSql =
             "SELECT u.user_id, u.username, " +
             "       COALESCE(DATE_FORMAT(CONVERT_TZ(gs.last_played, '+00:00', '-04:00'), 'Last played on %b %d, %Y'), 'No games played yet') AS lastActivity " +
             "FROM user u " +
@@ -58,7 +58,7 @@ public class PeopleService {
             "  )";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(followableUsersSql)) {
 
             int loggedInId = Integer.parseInt(userService.getLoggedInUser().getUserId());
             pstmt.setInt(1, Integer.parseInt(userIdToExclude));
@@ -95,18 +95,18 @@ public class PeopleService {
     public List<FollowableUser> getFollowingWithGameResults(String loggedInUserId) {
         List<FollowableUser> following = new ArrayList<>();
 
-        final String sql =
+        final String followingSql =
             "SELECT u.user_id, u.username, " +
             "       gs.solved, gs.guesses_used, " +
             "       COALESCE(DATE_FORMAT(CONVERT_TZ(gs.last_played, '+00:00', '-04:00'), '%b %d, %Y, %h:%i %p'), 'Not played today') AS lastActivity " +
             "FROM follow f " +
-            "JOIN user u ON u.user_id = f.followee_id " +
+            "≈ " +
             "LEFT JOIN game_session gs ON gs.user_id = u.user_id " +
             "    AND gs.game_id = (SELECT game_id FROM daily_game WHERE game_date = CURDATE()) " +
             "WHERE f.follower_id = ?";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(followingSql)) {
 
             pstmt.setInt(1, Integer.parseInt(loggedInUserId));
 
@@ -138,11 +138,11 @@ public class PeopleService {
      * @param followeeId the user_id of the user to follow
      */
     public boolean followUser(String followeeId) {
-        final String sql =
+        final String followSql =
             "INSERT IGNORE INTO follow (follower_id, followee_id) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(followSql)) {
 
             pstmt.setInt(1, Integer.parseInt(userService.getLoggedInUser().getUserId()));
             pstmt.setInt(2, Integer.parseInt(followeeId));
@@ -164,11 +164,11 @@ public class PeopleService {
      * @param followeeId the user_id of the user to unfollow
      */
     public boolean unfollowUser(String followeeId) {
-        final String sql =
+        final String unfollowSql =
             "DELETE FROM follow WHERE follower_id = ? AND followee_id = ?";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(unfollowSql)) {
 
             pstmt.setInt(1, Integer.parseInt(userService.getLoggedInUser().getUserId()));
             pstmt.setInt(2, Integer.parseInt(followeeId));
@@ -189,11 +189,11 @@ public class PeopleService {
      * @param followeeId the user_id to check
      */
     public boolean isFollowing(String followeeId) {
-        final String sql =
+        final String isFollowingSql =
             "SELECT 1 FROM follow WHERE follower_id = ? AND followee_id = ? LIMIT 1";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(isFollowingSql)) {
 
             pstmt.setInt(1, Integer.parseInt(userService.getLoggedInUser().getUserId()));
             pstmt.setInt(2, Integer.parseInt(followeeId));

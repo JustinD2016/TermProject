@@ -54,7 +54,7 @@ public class FeedController {
          * and users they follow. The list of games is ordered by the time that the game was played, with the most
          * recent games first.
          */
-        final String sql = "SELECT " +
+        final String feedSql = "SELECT " +
             "g.session_id, " +
             "g.guesses_used, " +
             "g.solved, " +
@@ -72,7 +72,7 @@ public class FeedController {
             "ORDER BY g.played_at DESC";
 
         try (Connection conn = dataSource.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(feedSql)) {
 
         String loggedInUserId = userService.getLoggedInUser().getUserId();
         // Games of players the logged in user follows and their own games.

@@ -40,9 +40,9 @@ public class Guess {
         } else if (deathYear.equals("match")) {
             this.deathYearHint = "<span class=\"hint-correct\">" + String.valueOf(guessedDeathYear) + "</span>";
         } else if (deathYear.equals("unknown") && guessedDeathYear <= 0) {
-            this.deathYearHint = "<span class=\"hint-incorrect\">Deceased</span>";
+            this.deathYearHint = "<span class=\"hint-incorrect\">Alive</span>";
         } else {
-            this.deathYearHint = "<span class=\"hint-incorrect\">Still Alive</span>";
+            this.deathYearHint = "<span class=\"hint-incorrect\">Deceased</span>";
         }
 
         this.professionHint = createProfessionHTML(hintResult);

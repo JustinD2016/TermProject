@@ -45,10 +45,10 @@ public class UserService {
      * Returns true if authentication is successful, false otherwise.
      */
     public boolean authenticate(String username, String password) throws SQLException {
-        final String sql = "SELECT user_id, username, password_hash FROM user WHERE username = ?";
+        final String authenticateSql = "SELECT user_id, username, password_hash FROM user WHERE username = ?";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(authenticateSql)) {
 
             pstmt.setString(1, username);
 
