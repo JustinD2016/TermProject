@@ -9,7 +9,7 @@ Jacob Stewart: Created ProfleController.sql, queries.sql file, Copied database_s
 
 Justin Dorval: Create Gameserivce.java Actor.java, GameSession.java, Game_page.mustache, GameController.java, Data.sql, Datasource.txt, Generate_data_sql.py, Databasesetup.dql
 
-Aaryan Gupta: [LIST CONTRIBUTIONS HERE]
+Aaryan Gupta: Implemented all files associated with Lookup page, drew ER diagram
 
 Keaton Brown: Created Feed.java, FeedController.java, feed_page.mustache, feed_game_card.mustache, and feed_games_container.mustache. Recorded video and did style adjustments.
 
