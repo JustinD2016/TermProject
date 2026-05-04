@@ -1,0 +1,54 @@
+<!--
+Copyright (c) 2024 Sami Menik, PhD. All rights reserved.
+
+This is a project developed by Dr. Menik to give the students an opportunity to apply database concepts learned in the class in a real world project. Permission is granted to host a running version of this software and to use images or videos of this work solely for the purpose of demonstrating the work to potential employers. Any form of reproduction, distribution, or transmission of the software's source code, in part or whole, without the prior written consent of the copyright owner, is strictly prohibited.
+-->
+{{> fragments/html_header}}
+{{> fragments/top_bar}}
+
+<h2>Actor Lookup</h2>
+
+<p>Search for an actor by name to see their information.</p>
+
+<form method="get" action="/lookup">
+    <input type="text" name="actorname" placeholder="Enter actor name" value="{{actorName}}">
+    <button type="submit">Search</button>
+</form>
+
+{{#searched}}
+
+    {{#foundActor}}
+        <h3>{{actor.firstName}} {{actor.lastName}}</h3>
+
+        <p><strong>Actor ID:</strong> {{actor.actorId}}</p>
+        <p><strong>Birth Year:</strong> {{actor.birthYear}}</p>
+        <p><strong>Death Year:</strong> {{actor.deathYear}}</p>
+
+        <h4>Known Titles</h4>
+
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Year</th>
+                <th>Genres</th>
+            </tr>
+
+            {{#actor.titles}}
+            <tr>
+                <td>{{primaryName}}</td>
+                <td>{{titleType}}</td>
+                <td>{{releaseYear}}</td>
+                <td>{{genres}}</td>
+            </tr>
+            {{/actor.titles}}
+        </table>
+    {{/foundActor}}
+
+    {{^foundActor}}
+        <p>No actor found for "{{actorName}}". Try checking the spelling.</p>
+    {{/foundActor}}
+
+{{/searched}}
+
+{{> fragments/footer}}
