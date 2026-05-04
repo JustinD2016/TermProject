@@ -1,0 +1,45 @@
+CSCI 4360 Database Management
+Index Performance Analysis
+
+Run after populating the database with data.sql (~1,500 actors, ~4,000 titles, ~5,500 actor_title rows).
+Times measured using EXPLAIN ANALYZE in MySQL.
+
+
+INDEX 1: idx_actor_last_name
+
+    CREATE INDEX idx_actor_last_name ON actor (last_name);
+
+    Affected Query (findActorSql: used when a guess is submitted to look up an actor by name):
+
+        SELECT actor_id FROM actor WHERE first_name = 'Robert' AND last_name = 'De Niro' LIMIT 1;
+
+    Before index:
+        Time: 2.35 ms
+        Plan: Table scan on actor (cost=161, rows=1500)
+              Filter on last_name and first_name (cost=161, rows=15)
+
+    After index:
+        Time: 0.111 ms
+        Plan: Index lookup on actor using idx_actor_last_name (last_name='De Niro') (cost=0.26, rows=1)
+              Filter on first_name (cost=0.26, rows=0.1)
+
+
+
+INDEX 2: idx_actor_birth_year
+
+    CREATE INDEX idx_actor_birth_year ON actor (birth_year);
+
+    Affected Query (used by the game hint system to compare birth years and filter actors by decade):
+
+        SELECT actor_id, first_name, last_name, birth_year FROM actor WHERE birth_year BETWEEN 1960 AND 1970;
+
+    Before index:
+        Time: 0.998 ms
+        Plan: Table scan on actor (cost=153, rows=1500)
+              Filter on birth_year BETWEEN 1960 AND 1970 (rows=370 returned)
+
+    After index:
+        Time: 0.0472 ms (first row), 2.39 ms (all 370 rows)
+        Plan: Index range scan on actor using idx_actor_birth_year (1960 <= birth_year <= 1970) (rows=370)
+
+
